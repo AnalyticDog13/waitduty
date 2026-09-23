@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LXA Wait Duty</title>
+  <meta name="description" content="Find your wait duty days and add them to Google Calendar.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --card: #ffffff;
+      --ink: #1d1b16;
+      --muted: #6b665c;
+      --line: #e3ded3;
+      --accent: #1a5d3f;
+      --accent-ink: #ffffff;
+      --accent-soft: #e4efe8;
+      --warn: #8a5a00;
+      --radius: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14130f;
+        --card: #1e1d18;
+        --ink: #f1ede4;
+        --muted: #a39d90;
+        --line: #34322b;
+        --accent: #5cc08e;
+        --accent-ink: #0d1f16;
+        --accent-soft: #1f3329;
+        --warn: #e0b04f;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 560px; margin: 0 auto; padding: 48px 16px 64px; }
+    h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 6px; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin: 0 0 28px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .combo { position: relative; }
+    .combo input {
+      width: 100%;
+      font: inherit;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .combo input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .combo ul {
+      position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 4px);
+      margin: 0; padding: 4px; list-style: none;
+      max-height: 260px; overflow-y: auto;
+      background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+    }
+    .combo li { padding: 9px 10px; border-radius: 7px; cursor: pointer; }
+    .combo li[aria-selected="true"] { background: var(--accent-soft); }
+    .combo li.empty { color: var(--muted); cursor: default; }
+    button, .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font: inherit; font-weight: 600; text-decoration: none;
+      padding: 12px 18px; border-radius: 10px; border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .primary { width: 100%; margin-top: 16px; background: var(--accent); color: var(--accent-ink); }
+    .primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .secondary { background: transparent; color: var(--accent); border-color: var(--line); padding: 8px 12px; font-size: 0.9rem; }
+    #result { margin-top: 20px; }
+    #result:empty { display: none; }
+    .shifts { list-style: none; margin: 12px 0 0; padding: 0; }
+    .shifts li {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 0; border-top: 1px solid var(--line);
+    }
+    .shifts .when { font-weight: 600; }
+    .shifts .floor { color: var(--muted); font-size: 0.9rem; }
+    .status { margin: 0 0 4px; }
+    .status.ok { color: var(--accent); font-weight: 600; }
+    .status.err { color: var(--warn); font-weight: 600; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .steps ol { margin: 8px 0 12px; padding-left: 22px; }
+    .steps li { margin: 4px 0; }
+    .steps { margin-bottom: 20px; }
+    .hint { color: var(--muted); font-size: 0.875rem; margin: 12px 0 0; }
+    footer { color: var(--muted); font-size: 0.8rem; margin-top: 28px; text-align: center; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>LXA Wait Duty</h1>
+    <p class="sub" id="subtitle">Pick your name and add all your wait duty days to Google Calendar, with reminders at 2:00 PM and 6:30 PM on the day.</p>
+
+    <div class="card">
+      <label for="name-input">Your name</label>
+      <div class="combo">
+        <input id="name-input" type="text" autocomplete="off" spellcheck="false"
+               placeholder="Start typing your name…"
+               role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="name-list">
+        <ul id="name-list" role="listbox" hidden></ul>
+      </div>
+      <button id="go" class="primary" disabled>Add to Google Calendar</button>
+      <div id="result" aria-live="polite"></div>
+    </div>
+
+    <footer id="footer"></footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="schedule.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
