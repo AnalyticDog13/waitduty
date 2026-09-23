@@ -404,7 +404,7 @@
       .then(() => {
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: config.googleClientId,
-          scope: "https://www.googleapis.com/auth/calendar.events",
+          scope: "https://www.googleapis.com/auth/calendar.events.owned",
           callback: () => {},
         });
       })

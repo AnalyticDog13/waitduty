@@ -36,9 +36,10 @@ Both modes also offer a `.ics` download for Apple Calendar or Outlook, which do 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com/) and create a project.
 2. **APIs & Services → Library**: enable **Google Calendar API**.
 3. **OAuth consent screen**: pick *External*, fill in the app name and your email, and add the scope
-   `https://www.googleapis.com/auth/calendar.events`. Then **publish** the app. You don't need
-   Google's verification: people will see an "unverified app" screen (Advanced → Go to site) and
-   can still use it, for up to 100 users.
+   `https://www.googleapis.com/auth/calendar.events.owned`. Then **publish** the app. Until Google
+   verifies it, people see an "unverified app" screen (Advanced → Go to site), for up to 100 users.
+   To remove that screen, submit it for sensitive-scope verification (verify the domain in Search
+   Console, add a demo video and a scope justification). The review usually takes a few business days.
 4. **Credentials → Create credentials → OAuth client ID → Web application**. Under *Authorized
    JavaScript origins*, add your Vercel production URL, e.g. `https://<project>.vercel.app`, with no trailing
    slash (and `http://localhost:8765` for testing). Sign-in only works on origins listed here, so

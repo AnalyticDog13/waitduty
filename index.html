@@ -102,6 +102,10 @@
       padding: 12px 16px; margin-bottom: 16px; color: var(--ink);
     }
     .notice p { margin: 0 0 8px; }
+    .about { margin-top: 32px; color: var(--muted); font-size: 0.9rem; }
+    .about h2 { font-size: 1rem; color: var(--ink); margin: 0 0 6px; }
+    .about p { margin: 0 0 10px; }
+    .about a { color: var(--accent); }
     footer { color: var(--muted); font-size: 0.8rem; margin-top: 28px; text-align: center; }
     footer a { color: inherit; }
   </style>
@@ -124,6 +128,16 @@
       <button id="go" class="primary" disabled>Add to Google Calendar</button>
       <div id="result" aria-live="polite"></div>
     </div>
+
+    <section class="about">
+      <h2>About this app</h2>
+      <p>LXA Wait Duty helps members of our chapter remember their wait duty (cleaning a floor of the
+        house on an assigned day). Pick your name, and the app adds each of your assigned days to your
+        Google Calendar as two short reminder events at 2:00 PM and 6:30 PM, showing which floor you're on.</p>
+      <p>To do that, it asks Google for permission to create events on calendars you own. It only
+        creates or updates its own wait duty events. It never reads, changes, or deletes your other
+        events, and nothing is stored on a server. See the <a href="privacy.html">privacy policy</a>.</p>
+    </section>
 
     <footer><span id="footer"></span> · <a href="privacy.html">Privacy</a></footer>
   </main>
