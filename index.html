@@ -95,7 +95,13 @@
     .steps ol { margin: 8px 0 12px; padding-left: 22px; }
     .steps li { margin: 4px 0; }
     .steps { margin-bottom: 20px; }
+    .steps .status { margin-bottom: 10px; }
     .hint { color: var(--muted); font-size: 0.875rem; margin: 12px 0 0; }
+    .notice {
+      border: 1px solid var(--warn); border-radius: var(--radius);
+      padding: 12px 16px; margin-bottom: 16px; color: var(--ink);
+    }
+    .notice p { margin: 0 0 8px; }
     footer { color: var(--muted); font-size: 0.8rem; margin-top: 28px; text-align: center; }
   </style>
 </head>
@@ -103,6 +109,8 @@
   <main>
     <h1>LXA Wait Duty</h1>
     <p class="sub" id="subtitle">Pick your name and add all your wait duty days to Google Calendar, with reminders at 2:00 PM and 6:30 PM on the day.</p>
+
+    <div id="notice" class="notice" role="alert" hidden></div>
 
     <div class="card">
       <label for="name-input">Your name</label>

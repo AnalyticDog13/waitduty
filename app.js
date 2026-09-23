@@ -131,6 +131,7 @@
   // ---------- Google Calendar API (only when a client ID is configured) ----------
 
   let tokenClient = null;
+  let cachedToken = null; // { value, expiresAt }, so a second click doesn't re-prompt
 
   function loadGoogleIdentity() {
     return new Promise((resolve, reject) => {
@@ -144,9 +145,16 @@
     });
   }
 
+  // Must be called synchronously inside the click handler: mobile Safari blocks
+  // the Google sign-in popup if anything is awaited before it opens.
   function requestToken() {
     return new Promise((resolve, reject) => {
-      tokenClient.callback = (resp) => (resp.error ? reject(new Error(resp.error)) : resolve(resp.access_token));
+      if (cachedToken && cachedToken.expiresAt > Date.now()) return resolve(cachedToken.value);
+      tokenClient.callback = (resp) => {
+        if (resp.error) return reject(new Error(resp.error));
+        cachedToken = { value: resp.access_token, expiresAt: Date.now() + (resp.expires_in - 60) * 1000 };
+        resolve(resp.access_token);
+      };
       tokenClient.error_callback = (err) => reject(new Error(err.type || "Sign-in was cancelled."));
       tokenClient.requestAccessToken();
     });
@@ -326,7 +334,7 @@
       className: "btn secondary",
       href: icsUrl(shifts),
       download: icsFilename(),
-      textContent: "Download .ics (Apple / Outlook)",
+      textContent: "Use Apple Calendar or Outlook instead",
     });
 
     result.append(
@@ -357,11 +365,16 @@
       return;
     }
 
+    if (!tokenClient) {
+      renderShifts(el("p", { className: "status err", textContent: "Google sign-in is still loading. Tap the button again in a second." }));
+      return;
+    }
+    const tokenPromise = requestToken(); // before any await, see requestToken()
+
     goButton.disabled = true;
     goButton.textContent = "Adding…";
     try {
-      await googleReady;
-      const token = await requestToken();
+      const token = await tokenPromise;
       await Promise.all(eventsFor(shifts).map((e) => upsertEvent(token, selectedName, e)));
       const open = el("a", {
         className: "btn secondary",
@@ -370,7 +383,10 @@
         rel: "noopener",
         textContent: "Open Google Calendar →",
       });
-      renderShifts(el("p", { className: "status ok" }, `Added ${shifts.length} day${shifts.length === 1 ? "" : "s"} to your calendar. `, open));
+      renderShifts(el("div", { className: "steps" },
+        el("p", { className: "status ok", textContent: `Done! Added ${shifts.length} day${shifts.length === 1 ? "" : "s"} to your Google Calendar.` }),
+        open
+      ));
     } catch (err) {
       renderShifts(el("p", { className: "status err", textContent: `Couldn't add events (${err.message}). Try again, or use the .ics download below.` }));
     } finally {
@@ -383,14 +399,32 @@
   document.getElementById("footer").textContent =
     `${schedule.title} · ${names.length} people · ${schedule.days.length} days`;
 
-  const googleReady = !useGoogleApi ? Promise.resolve() : loadGoogleIdentity()
+  if (useGoogleApi) {
+    loadGoogleIdentity()
       .then(() => {
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: config.googleClientId,
           scope: "https://www.googleapis.com/auth/calendar.events",
           callback: () => {},
         });
-      });
+      })
+      .catch((err) => showNotice(`${err.message} Check your connection and reload the page.`));
+  }
+
+  // Google refuses to sign in inside apps' built-in browsers (GroupMe, Instagram, etc.).
+  const inAppBrowser = /GroupMe|Instagram|FBAN|FBAV|Snapchat|Line\/|LinkedInApp|TikTok|musical_ly|; wv\)/i.test(navigator.userAgent);
+  if (useGoogleApi && inAppBrowser) {
+    const copy = el("button", { className: "btn secondary", type: "button", textContent: "Copy link" });
+    copy.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(siteUrl); copy.textContent = "Copied ✓"; } catch { copy.textContent = siteUrl; }
+    });
+    showNotice("Google sign-in doesn't work inside this app. Open this page in Safari or Chrome: tap ··· or the share icon, then \"Open in browser\".", copy);
+  }
+
+  function showNotice(text, ...extra) {
+    document.getElementById("notice").replaceChildren(el("p", { textContent: text }), ...extra);
+    document.getElementById("notice").hidden = false;
+  }
 
   let remembered = null;
   try { remembered = localStorage.getItem(STORAGE_KEY); } catch {}
